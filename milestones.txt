@@ -1,0 +1,11 @@
+Milestones:
+
+
+1/11/2017:
+
+	Kai - openAIgym example to run
+
+	Sidney - introduction to  RL youtube courses, get python virtualenv to run with
+		  openAIgym
+
+8/11/2017
