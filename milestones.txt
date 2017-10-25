@@ -2,10 +2,17 @@ Milestones:
 
 
 1/11/2017:
+	- Get virtualenv with openAI gym working on all machines
+	- read into literature, see readme
+	- explore game options from openAI gym
 
-	Kai - openAIgym example to run
+Action Items	
+	Kai
+		(1) openAIgym example to run for one or two games
 
-	Sidney - introduction to  RL youtube courses, get python virtualenv to run with
-		  openAIgym
+	Sidney
+		(1) introduction to  RL youtube courses
+		(2) get python virtualenv to run with openAIgym
 
-8/11/2017
+8/11/2017:
+
