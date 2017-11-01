@@ -1,5 +1,13 @@
 Milestones:
 
+- Decide on a game
+- Find a suitable blog post using an interesting architecture
+- Brainstorm other approaches to example
+- Make changes to example 
+- Write draft
+- Write daper
+- Prepare deck
+
 
 1/11/2017:
 	- Get virtualenv with openAI gym working on all machines
@@ -15,4 +23,9 @@ Action Items
 		(2) get python virtualenv to run with openAIgym
 
 8/11/2017:
+	- Scan for interesting examples with write up
+	- Lots of example with games in open ai gym https://gym.openai.com/envs/
+
+Actions Items
+	
 
