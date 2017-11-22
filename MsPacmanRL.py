@@ -33,7 +33,9 @@
 
 import gym
 import numpy as np
-
+import pickle
+import datetime as date
+import os
 
 def downsample(image):
     # Take only alternate pixels - basically halves the resolution of the image (which is fine for us)
@@ -173,7 +175,7 @@ def main():
 
     # hyperparameters
     episode_number = 0
-    batch_size = 10 #TODO find good batch size
+    batch_size = 5 #TODO find good batch size
     gamma = 0.99  # discount factor for reward
     decay_rate = 0.99
     num_hidden_layer_neurons = 200
@@ -252,8 +254,27 @@ def main():
             observation = env.reset()  # reset env
             running_reward = reward_sum if running_reward is None else running_reward * 0.99 + reward_sum * 0.01
             print('resetting env. episode reward total was %f. running mean: %f' % (reward_sum, running_reward))
+
+            path = '../weights/'
+            file_name = date.datetime.now().isoformat()+'_episode_'+str(episode_number)
+
+
+
+
+
+            absolute_weights_path = os.path.dirname(os.path.abspath(__file__))+'/weights/'
+
+            #absolute_path.replace('src','weights/')
+
+            print absolute_weights_path+file_name
+
+            with open(absolute_weights_path+file_name, 'wb') as handle:
+                pickle.dump(weights, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
             reward_sum = 0
             prev_processed_observations = None
+
+
 
 
 main()
