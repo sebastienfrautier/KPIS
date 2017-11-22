@@ -28,7 +28,8 @@ Milestones:
      - Try with different hyper parameters
      - c.f. Weight decay etc.
      - Look for other hyper parameters
-
+     - run infrastrucutre:
+        python MsPacmanRunningEnv.py --weights='path' --continue true --episodes 100 --name='trialwithhp'
 
 
 22/11/2017:

@@ -258,13 +258,14 @@ def main():
             path = '../weights/'
             file_name = date.datetime.now().isoformat()+'_episode_'+str(episode_number)
 
-
-
-
+            config = {'weights': weights
+                    ,'episode_number':episode_number
+                    ,'reward_sum' : reward_sum
+                    , 'running_rewrad' : running_reward
+                    , 'hyperparameter' : {'gamma':2}}
 
             absolute_weights_path = os.path.dirname(os.path.abspath(__file__))+'/weights/'
 
-            #absolute_path.replace('src','weights/')
 
             print absolute_weights_path+file_name
 
@@ -273,7 +274,6 @@ def main():
 
             reward_sum = 0
             prev_processed_observations = None
-
 
 
 
