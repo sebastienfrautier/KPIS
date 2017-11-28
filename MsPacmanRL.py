@@ -36,6 +36,8 @@ import numpy as np
 import pickle
 import datetime as date
 import os
+import argparse
+
 
 def downsample(image):
     # Take only alternate pixels - basically halves the resolution of the image (which is fine for us)
@@ -172,8 +174,29 @@ def discount_with_rewards(gradient_log_p, episode_rewards, gamma):
 def main():
     env = gym.make("MsPacman-v0")
     observation = env.reset()  # This gets us the image
+    #setup
+    parser = argparse.ArgumentParser(description='MsPacman')
 
-    # hyperparameters
+    parser.add_argument('-e', help='number of episodes')
+
+    parser.add_argument('-r', help='run with trained weights')
+
+    parser.add_argument('-w', help='write last weights')
+
+    parser.add_argument('-mode', help='train or run')
+
+
+    args = parser.parse_args()
+
+    if args.e:
+        print "setting max episode to "+args.e
+        max_episode = args.e
+    else:
+        max_episode = 100
+
+    if args.w == 'true':
+        write = 'true'
+
     episode_number = 0
     batch_size = 5 #TODO find good batch size
     gamma = 0.99  # discount factor for reward
@@ -201,7 +224,73 @@ def main():
 
     episode_hidden_layer_values, episode_observations, episode_gradient_log_ps, episode_rewards = [], [], [], []
 
+    if args.w == 'true':
+        write = 'true'
+    else:
+        write = None
+
+    if args.mode == 'train':
+        print 'Entering training mode train'
+        train(env
+              ,episode_number
+              ,max_episode
+              ,input_dimensions
+              ,weights
+              ,reward_sum
+              ,g_dict
+              ,batch_size
+              ,expectation_g_squared
+              ,decay_rate
+              ,learning_rate
+              ,gamma
+              ,observation
+              ,prev_processed_observations
+              ,[]
+              ,[]
+              ,[]
+              ,[])
+
+    if args.mode == 'run':
+        run(args.r,env,observation, prev_processed_observations,input_dimensions)
+
+
+def run(file_name,env,observation, prev_processed_observations,input_dimensions):
+    absolute_weights_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/'
+
+    with open(absolute_weights_path+file_name, 'rb') as handle:
+        weights = pickle.load(handle)
     while True:
+        env.render()
+        processed_observations, prev_processed_observations = preprocess_observations(observation,
+                                                                                      prev_processed_observations,
+                                                                                      input_dimensions)
+        hidden_layer_values, up_probability = apply_neural_nets(processed_observations, weights)
+
+        action = choose_action(up_probability)
+
+        # carry out the chosen action
+        observation, reward, done, info = env.step(action)
+
+
+
+def train(env
+          ,episode_number
+          , max_episode
+          , input_dimensions
+          , weights
+          , reward_sum
+          , g_dict
+          , batch_size
+          , expectation_g_squared
+          , decay_rate
+          , learning_rate
+          , gamma
+          ,observation
+          ,prev_processed_observations
+          ,episode_hidden_layer_values
+          , episode_observations, episode_gradient_log_ps, episode_rewards
+          ):
+    while episode_number < int(max_episode):
         env.render()
         processed_observations, prev_processed_observations = preprocess_observations(observation,
                                                                                       prev_processed_observations,
@@ -226,7 +315,7 @@ def main():
 
         if done:  # an episode finished
             episode_number += 1
-            print("EPISODE DONE")
+            print("Current episode: ")+str(episode_number)
             # Combine the following values for the episode
             episode_hidden_layer_values = np.vstack(episode_hidden_layer_values)
             episode_observations = np.vstack(episode_observations)
@@ -254,26 +343,27 @@ def main():
             observation = env.reset()  # reset env
             running_reward = reward_sum if running_reward is None else running_reward * 0.99 + reward_sum * 0.01
             print('resetting env. episode reward total was %f. running mean: %f' % (reward_sum, running_reward))
-
-            path = '../weights/'
-            file_name = date.datetime.now().isoformat()+'_episode_'+str(episode_number)
-
-            config = {'weights': weights
-                    ,'episode_number':episode_number
-                    ,'reward_sum' : reward_sum
-                    , 'running_rewrad' : running_reward
-                    , 'hyperparameter' : {'gamma':2}}
-
-            absolute_weights_path = os.path.dirname(os.path.abspath(__file__))+'/weights/'
-
-
-            print absolute_weights_path+file_name
-
-            with open(absolute_weights_path+file_name, 'wb') as handle:
-                pickle.dump(weights, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
             reward_sum = 0
             prev_processed_observations = None
+
+    #path = '../weights/'
+    if episode_number == int(max_episode):
+        file_name = date.datetime.now().isoformat()+'_episode_'+str(episode_number)
+
+        config = {'weights': weights
+                ,'episode_number':episode_number
+                ,'reward_sum' : reward_sum
+                , 'running_reward' : running_reward
+                , 'hyperparameter' : {'gamma':2}}
+
+        absolute_weights_path = os.path.dirname(os.path.abspath(__file__))+'/weights/'
+
+
+        print absolute_weights_path+file_name
+
+        with open(absolute_weights_path+file_name, 'wb') as handle:
+                pickle.dump(weights, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
 
 
