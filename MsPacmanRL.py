@@ -270,6 +270,8 @@ def run(file_name,env,observation, prev_processed_observations,input_dimensions)
 
         # carry out the chosen action
         observation, reward, done, info = env.step(action)
+        if done:
+            env.reset()  # reset env
 
 
 
@@ -285,10 +287,11 @@ def train(env
           , decay_rate
           , learning_rate
           , gamma
-          ,observation
-          ,prev_processed_observations
-          ,episode_hidden_layer_values
+          , observation
+          , prev_processed_observations
+          , episode_hidden_layer_values
           , episode_observations, episode_gradient_log_ps, episode_rewards
+          ,running_reward =None
           ):
     while episode_number < int(max_episode):
         env.render()
