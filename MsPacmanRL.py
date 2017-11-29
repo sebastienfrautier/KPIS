@@ -208,6 +208,7 @@ def main():
     learning_rate = 1e-4
 
     episode_number = 0
+    running_reward_list=[]
     reward_sum = 0
     running_reward = None
     prev_processed_observations = None
@@ -241,6 +242,7 @@ def main():
             weights =config['weights']
             running_reward=config['running_reward']
             episode_number = config['episode_number']
+            running_reward_list=config['running_reward_list']
 
             gamma=config['hyperparameter']['gamma']
             learning_rate= config['hyperparameter']['learning_rate']
@@ -268,7 +270,8 @@ def main():
               ,[]
               ,[]
               ,[]
-              ,running_reward=running_reward)
+              ,running_reward=running_reward
+              ,running_reward_list=running_reward_list)
 
     if args.mode == 'run':
         run(args.c,env,observation, prev_processed_observations,input_dimensions)
@@ -311,7 +314,9 @@ def train(env
           , prev_processed_observations
           , episode_hidden_layer_values
           , episode_observations, episode_gradient_log_ps, episode_rewards
+            ,running_reward_list
           ,running_reward =None
+
           ):
 
     end_episode=episode_number+int(max_episode)
@@ -369,6 +374,7 @@ def train(env
             episode_hidden_layer_values, episode_observations, episode_gradient_log_ps, episode_rewards = [], [], [], []  # reset values
             observation = env.reset()  # reset env
             running_reward = reward_sum if running_reward is None else running_reward * 0.99 + reward_sum * 0.01
+            running_reward_list.append(running_reward)
             print('resetting env. episode reward total was %f. running mean: %f' % (reward_sum, running_reward))
             reward_sum = 0
             prev_processed_observations = None
@@ -381,6 +387,7 @@ def train(env
                 ,'episode_number': episode_number
                 ,'reward_sum' : reward_sum
                 , 'running_reward' : running_reward
+                , 'running_reward_list' : running_reward_list
                 , 'hyperparameter' : {'gamma':gamma
                                         ,'batch_size':batch_size
                                         , 'learning_rate': learning_rate
