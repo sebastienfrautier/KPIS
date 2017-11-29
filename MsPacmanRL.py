@@ -185,6 +185,8 @@ def main():
 
     parser.add_argument('-mode', help='train or run')
 
+    parser.add_argument('-c', help='continue with config file')
+
 
     args = parser.parse_args()
 
@@ -194,8 +196,8 @@ def main():
     else:
         max_episode = 100
 
-    if args.w == 'true':
-        write = 'true'
+    #if args.c == 'true':
+    #    continue = True
 
     episode_number = 0
     batch_size = 5 #TODO find good batch size
@@ -230,13 +232,30 @@ def main():
         write = None
 
     if args.mode == 'train':
+        if args.c:
+            print 'Entering training with config file: '+args.c
+            absolute_weights_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/'
+            with open(absolute_weights_path + args.c, 'rb') as handle:
+                config = pickle.load(handle)
+
+            weights =config['weights']
+            running_reward=config['running_reward']
+            episode_number = config['episode_number']
+
+            gamma=config['hyperparameter']['gamma']
+            learning_rate= config['hyperparameter']['learning_rate']
+            decay_rate=config['hyperparameter']['decay_rate']
+            batch_size= config['hyperparameter']['batch_size']
+
+            print 'Entering training with reward_sum: ' + str(running_reward)
+
         print 'Entering training mode train'
         train(env
               ,episode_number
               ,max_episode
               ,input_dimensions
               ,weights
-              ,reward_sum
+              ,0
               ,g_dict
               ,batch_size
               ,expectation_g_squared
@@ -248,23 +267,24 @@ def main():
               ,[]
               ,[]
               ,[]
-              ,[])
+              ,[]
+              ,running_reward=running_reward)
 
     if args.mode == 'run':
-        run(args.r,env,observation, prev_processed_observations,input_dimensions)
+        run(args.c,env,observation, prev_processed_observations,input_dimensions)
 
 
 def run(file_name,env,observation, prev_processed_observations,input_dimensions):
     absolute_weights_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/'
 
     with open(absolute_weights_path+file_name, 'rb') as handle:
-        weights = pickle.load(handle)
+        config = pickle.load(handle)
     while True:
         env.render()
         processed_observations, prev_processed_observations = preprocess_observations(observation,
                                                                                       prev_processed_observations,
                                                                                       input_dimensions)
-        hidden_layer_values, up_probability = apply_neural_nets(processed_observations, weights)
+        hidden_layer_values, up_probability = apply_neural_nets(processed_observations, config['weights'])
 
         action = choose_action(up_probability)
 
@@ -293,7 +313,11 @@ def train(env
           , episode_observations, episode_gradient_log_ps, episode_rewards
           ,running_reward =None
           ):
-    while episode_number < int(max_episode):
+
+    end_episode=episode_number+int(max_episode)
+
+    print('new end episode %f with episode_number %f and max %s' % (end_episode, episode_number, max_episode))
+    while episode_number < end_episode:
         env.render()
         processed_observations, prev_processed_observations = preprocess_observations(observation,
                                                                                       prev_processed_observations,
@@ -354,10 +378,15 @@ def train(env
         file_name = date.datetime.now().isoformat()+'_episode_'+str(episode_number)
 
         config = {'weights': weights
-                ,'episode_number':episode_number
+                ,'episode_number': episode_number
                 ,'reward_sum' : reward_sum
                 , 'running_reward' : running_reward
-                , 'hyperparameter' : {'gamma':2}}
+                , 'hyperparameter' : {'gamma':gamma
+                                        ,'batch_size':batch_size
+                                        , 'learning_rate': learning_rate
+                                        , 'decay_rate': decay_rate}
+                  }
+
 
         absolute_weights_path = os.path.dirname(os.path.abspath(__file__))+'/weights/'
 
@@ -365,7 +394,7 @@ def train(env
         print absolute_weights_path+file_name
 
         with open(absolute_weights_path+file_name, 'wb') as handle:
-                pickle.dump(weights, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(config, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 

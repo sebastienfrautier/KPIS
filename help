@@ -1,0 +1,2 @@
+python MsPacmanRL.py -mode train -c 2017-11-29T12:33:53.629782_episode_10 -e 2
+python MsPacmanRL.py -mode run -c 2017-11-29T12:33:53.629782_episode_10 -e 2
