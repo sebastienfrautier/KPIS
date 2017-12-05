@@ -380,7 +380,7 @@ def train(env
             prev_processed_observations = None
 
     #path = '../weights/'
-    if episode_number == int(max_episode):
+    if episode_number == end_episode:
         file_name = date.datetime.now().isoformat()+'_episode_'+str(episode_number)
 
         config = {'weights': weights
