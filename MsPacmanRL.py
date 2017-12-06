@@ -62,17 +62,22 @@ def remove_background(image):
 
 def preprocess_observations(input_observation, prev_processed_observation, input_dimensions):
     """ convert the 210x160x3 uint8 frame into a 6400 float vector """
-    processed_observation = input_observation[35:195]  # crop
-    processed_observation = downsample(processed_observation)
-    processed_observation = remove_color(processed_observation)
-    processed_observation = remove_background(processed_observation)
-    processed_observation[processed_observation != 0] = 1  # everything else (paddles, ball) just set to 1
+    #processed_observation = input_observation[35:195]  # crop
+    processed_observation = input_observation
+    #processed_observation = downsample(processed_observation)
+    #processed_observation = remove_color(processed_observation)
+    #processed_observation = remove_background(processed_observation)
+    #processed_observation[processed_observation != 0] = 1  # everything else (paddles, ball) just set to 1
     # Convert from 80 x 80 matrix to 1600 x 1 matrix
+
+    preprocessed = processed_observation
+
     processed_observation = processed_observation.astype(np.float).ravel()
 
     # subtract the previous frame from the current one so we are only processing on changes in the game
     if prev_processed_observation is not None:
         input_observation = processed_observation - prev_processed_observation
+
     else:
         input_observation = np.zeros(input_dimensions)
     # store the previous frame so we can subtract from it next time
@@ -109,10 +114,15 @@ def choose_action(probability):
     #else:
     #    # signifies down in openai gym
     #    return 3
-    if (probability < random_value).any():
-        return probability.argmax()
-    else:
-        return np.random.randint(1,5)
+    action = np.random.randint(1,5)
+    if random_value >= 0.1:
+        action = probability.argmax()
+    return action
+
+    #if (probability >= random_value).any():
+    #    return probability.argmax()
+    #else:
+    #    return np.random.randint(1,5)
 
 def compute_gradient(gradient_log_p, hidden_layer_values, observation_values, weights):
     """ See here: http://neuralnetworksanddeeplearning.com/chap2.html"""
@@ -204,7 +214,7 @@ def main():
     gamma = 0.99  # discount factor for reward
     decay_rate = 0.99
     num_hidden_layer_neurons = 200
-    input_dimensions = 80 * 80
+    input_dimensions = 100800
     learning_rate = 1e-4
 
     episode_number = 0
