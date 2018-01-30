@@ -41,7 +41,6 @@ import argparse
 
 def downsample(image):
     # Take only alternate pixels - basically halves the resolution of the image (which is fine for us)
-    #print np.shape(image)
     return image[::2, ::2, :]
 
 def softmax(x):
@@ -99,48 +98,24 @@ def apply_neural_nets(observation_matrix, weights):
     hidden_layer_values = relu(hidden_layer_values)
     output_layer_values = np.dot(hidden_layer_values, weights['2'])
     output_layer_values = softmax(output_layer_values)
-    #print hidden_layer_values
-    #print(output_layer_values)#TODO used to debug, remove?
     return hidden_layer_values, output_layer_values
 
 
 def choose_action(probability):
     random_value = np.random.uniform()
-    #if random_value < probability:
-    #    # signifies up in openai gym
-    #    return 2
-    #else:
-    #    # signifies down in openai gym
-    #    return 3
     action = np.random.randint(1,5)
     if random_value >= 0.1:
         action = probability.argmax()
     return action
 
-    #if (probability >= random_value).any():
-    #    return probability.argmax()
-    #else:
-    #    return np.random.randint(1,5)
-
 def compute_gradient(gradient_log_p, hidden_layer_values, observation_values, weights):
     """ See here: http://neuralnetworksanddeeplearning.com/chap2.html"""
-    #print("compute_gradient call")##TODO used to debug, remove?
 
     delta_L = gradient_log_p
-    #dC_dw2 = np.dot(hidden_layer_values.T, delta_L).ravel() #should be (200,) is (800,)
     dC_dw2 = np.dot(hidden_layer_values.T, delta_L)
-    #delta_l2 = np.outer(delta_L, weights['2']) #should be (X,200) is 4*(X,200)
     delta_l2 = np.dot(delta_L, weights['2'].T)
     delta_l2 = relu(delta_l2)
-
-    #print('gradient_log_p.shape %s.' % (gradient_log_p.shape,))
-    #print('delta_l2.T.shape %s.' % (delta_l2.T.shape ,))
-    #print('observation_values.shape %s.' % (observation_values.shape, ))
-    #print('weights["1"] %s.' % (weights['1'].shape, ))
-    #print('weights["2"] %s.' % (weights['2'].shape, ))
     dC_dw1 = np.dot(delta_l2.T, observation_values)
-    #print('dc_dw1 %s.' % (dC_dw1.shape,))
-    #print('dc_dw2 %s.' % (dC_dw2.shape,))#TODO used to debug, remove?
     return {
         '1': dC_dw1,
         '2': dC_dw2
@@ -207,7 +182,7 @@ def main():
     #if args.c == 'true':
     #    continue = True
 
-    batch_size = 5 #TODO find good batch size
+    batch_size = 5
     gamma = 0.99  # discount factor for reward
     decay_rate = 0.99
     num_hidden_layer_neurons = 200
@@ -386,7 +361,6 @@ def train(env
             reward_sum = 0
             prev_processed_observations = None
 
-    #path = '../weights/'
     if episode_number == end_episode:
         file_name = date.datetime.now().isoformat()+'_episode_'+str(episode_number)
 
