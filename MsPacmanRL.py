@@ -70,8 +70,6 @@ def preprocess_observations(input_observation, prev_processed_observation, input
     #processed_observation[processed_observation != 0] = 1  # everything else (paddles, ball) just set to 1
     # Convert from 80 x 80 matrix to 1600 x 1 matrix
 
-    preprocessed = processed_observation
-
     processed_observation = processed_observation.astype(np.float).ravel()
 
     # subtract the previous frame from the current one so we are only processing on changes in the game
@@ -209,12 +207,11 @@ def main():
     #if args.c == 'true':
     #    continue = True
 
-    episode_number = 0
     batch_size = 5 #TODO find good batch size
     gamma = 0.99  # discount factor for reward
     decay_rate = 0.99
     num_hidden_layer_neurons = 200
-    input_dimensions = 100800
+    input_dimensions = 210*160*3
     learning_rate = 1e-4
 
     episode_number = 0
